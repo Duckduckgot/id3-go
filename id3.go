@@ -159,7 +159,16 @@ func (f *Buffer) Close() error {
 			f.data = f.data[diff:]
 		}
 	}
-	for i, b := range f.Tagger.Bytes() {
+	// Ensure that f.data has enough capacity to hold the data from Tagger.Bytes()
+	tagBytes := f.Tagger.Bytes()
+	if len(f.data) < offset+len(tagBytes) {
+		// Resize f.data to fit the new data
+		newData := make([]byte, offset+len(tagBytes))
+		copy(newData, f.data)
+		f.data = newData
+	}
+
+	for i, b := range tagBytes {
 		f.data[offset+i] = b
 	}
 	return err
